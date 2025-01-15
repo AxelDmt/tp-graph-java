@@ -33,13 +33,14 @@ public class Edge {
 	 */
 	private Vertex target;
 
-	public Edge(Vertex source, Vertex target) {
+	/*public Edge(Vertex source, Vertex target) {
         if (source == null || target == null) {
             throw new IllegalArgumentException("Source and target vertices cannot be null.");
         }
         this.source = source;
         this.target = target;
     }
+	*/
 
 	public String getId() {
 		return id;
