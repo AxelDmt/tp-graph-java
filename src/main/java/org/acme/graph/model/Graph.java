@@ -129,4 +129,21 @@ public class Graph {
 		return result;
 	}
 
+	public Vertex createVertex(Coordinate coordinate, String id) {
+        Vertex vertex = new Vertex();
+        vertex.setId(id);
+        vertex.setCoordinate(coordinate);
+        vertices.add(vertex);
+        return vertex;
+    }
+
+	public Edge createEdge(Vertex source, Vertex target, String id) {
+		Edge edge = new Edge();
+		edge.setSource(source);
+		edge.setTarget(target);
+		edge.setId(id);
+		edges.add(edge);
+		return edge;
+	}
+
 }
