@@ -33,6 +33,11 @@ public class Edge {
 	 */
 	private Vertex target;
 
+	/**
+     * Géométrie réelle de l'arc
+     */
+    private LineString geometry;
+
 	/*public Edge(Vertex source, Vertex target) {
         if (source == null || target == null) {
             throw new IllegalArgumentException("Source and target vertices cannot be null.");
@@ -86,11 +91,21 @@ public class Edge {
 	 * @return
 	 */
 	public double getCost() {
+		if (geometry != null) {
+            return geometry.getLength();
+        }
 		return source.getCoordinate().distance(target.getCoordinate());
 	}
 
+	public void setGeometry(LineString geometry) {
+        this.geometry = geometry;
+    }
+	
 	@JsonSerialize(using = GeometrySerializer.class)
 	public LineString getGeometry() {
+		if (geometry != null) {
+            return geometry;
+        }
 		GeometryFactory gf = new GeometryFactory();
 		return gf.createLineString(new Coordinate[] {
 			source.getCoordinate(),
