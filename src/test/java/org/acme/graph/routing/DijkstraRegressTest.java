@@ -5,6 +5,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.util.List;
+import static org.junit.Assert.fail;
+
+
+
+import org.acme.graph.errors.NotFoundException;
 
 import org.acme.graph.TestGraphFactory;
 import org.acme.graph.model.Edge;
@@ -46,8 +51,12 @@ public class DijkstraRegressTest {
 
 	@Test
 	public void testBANotFound() {
-		List<Edge> path = finder.findPath(graph.findVertex("b"), graph.findVertex("a"));
-		assertNull(path);
+		try {
+            finder.findPath(graph.findVertex("b"), graph.findVertex("a"));
+            fail("Expected NotFoundException not thrown");
+        } catch (NotFoundException e) {
+            assertEquals("Path not found from 'b' to 'a'", e.getMessage());
+        }
 	}
 
 	@Test
