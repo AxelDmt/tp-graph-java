@@ -38,14 +38,15 @@ public class Edge {
      */
     private LineString geometry;
 
-	/*public Edge(Vertex source, Vertex target) {
+	public Edge(Vertex source, Vertex target) {
         if (source == null || target == null) {
             throw new IllegalArgumentException("Source and target vertices cannot be null.");
         }
         this.source = source;
         this.target = target;
+		source.getOutEdges().add(this);
+        target.getInEdges().add(this);
     }
-	*/
 
 	public String getId() {
 		return id;
@@ -66,9 +67,9 @@ public class Edge {
 		return source;
 	}
 
-	public void setSource(Vertex source) {
+	/*public void setSource(Vertex source) {
 		this.source = source;
-	}
+	}*/
 
 	/**
 	 * Cible avec rendu JSON sous forme d'identifiant
@@ -81,9 +82,9 @@ public class Edge {
 		return target;
 	}
 
-	public void setTarget(Vertex target) {
+	/*public void setTarget(Vertex target) {
 		this.target = target;
-	}
+	}*/
 
 	/**
 	 * dijkstra - coût de parcours de l'arc (distance géométrique)
@@ -100,7 +101,7 @@ public class Edge {
 	public void setGeometry(LineString geometry) {
         this.geometry = geometry;
     }
-	
+
 	@JsonSerialize(using = GeometrySerializer.class)
 	public LineString getGeometry() {
 		if (geometry != null) {

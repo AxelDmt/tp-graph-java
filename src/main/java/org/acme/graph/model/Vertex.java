@@ -1,5 +1,8 @@
 package org.acme.graph.model;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -40,6 +43,12 @@ public class Vertex {
 	 * dijkstra - indique si le sommet est visité
 	 */
 	private boolean visited;
+
+	@JsonIgnore
+	private List<Edge> inEdges = new ArrayList<>(); 
+
+	@JsonIgnore
+	private List<Edge> outEdges = new ArrayList<>();
 
 	/*public Vertex() {
 
@@ -87,6 +96,16 @@ public class Vertex {
 	public void setVisited(boolean visited) {
 		this.visited = visited;
 	}
+
+	@JsonIgnore
+	public List<Edge> getInEdges() {
+        return inEdges;
+    }
+
+	@JsonIgnore
+    public List<Edge> getOutEdges() {
+        return outEdges;
+    }
 
 	@JsonSerialize(using = GeometrySerializer.class)
 	public Point getGeometry() {
