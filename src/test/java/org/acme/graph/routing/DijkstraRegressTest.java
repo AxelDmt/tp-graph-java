@@ -33,20 +33,21 @@ public class DijkstraRegressTest {
 	public void setUp() throws Exception {
 		this.graph = TestGraphFactory.createGraph01();
 		this.finder = new DijkstraPathFinder(graph);
+
 	}
 
 	@Test
 	public void testAAFound() {
 		List<Edge> path = finder.findPath(graph.findVertex("a"), graph.findVertex("a"));
-		assertNotNull(path);
-		assertEquals(0, path.size());
+		assertNotNull("The path should not be null", path);
+		assertEquals("The path size should be 0",0, path.size());
 	}
 
 	@Test
 	public void testABFound() {
 		List<Edge> path = finder.findPath(graph.findVertex("a"), graph.findVertex("b"));
-		assertNotNull(path);
-		assertEquals(1, path.size());
+		assertNotNull("The path should not be null", path);
+		assertEquals("The path size should be 1", 1, path.size());
 	}
 
 	@Test
