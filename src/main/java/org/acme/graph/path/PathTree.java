@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Collection;
 
 import org.acme.graph.model.Vertex;
 import org.acme.graph.model.Graph;
@@ -32,6 +33,9 @@ public class PathTree {
 	 * @return
 	 */
 	public List<Edge> getPath(Vertex target) {
+        if (!isReached(target)) {
+            throw new IllegalArgumentException(String.format("Vertex '%s' is not reached.", target.getId()));
+        }
 		List<Edge> result = new ArrayList<>();
 		PathNode targetNode = getNode(target);
 		for ( 
@@ -51,18 +55,27 @@ public class PathTree {
 	 * 
 	 * @param source
 	 */
-	public PathTree(Graph graph, Vertex source) {
-        log.trace("initGraph({})", source);
-        this.graph = graph;
-        nodes = new HashMap<>();
-        
-        for (Vertex vertex : graph.getVertices()) {
-            PathNode node = new PathNode(vertex);
-            nodes.put(vertex, node);
-            if (source == vertex) {
-                node.setCost(0.0);
-            }
-        }
+    public PathTree(Vertex origin) {
+        log.trace("initGraph({})", origin);
+        this.nodes = new HashMap<>();
+        PathNode originNode = new PathNode(origin);
+        originNode.setCost(0.0);
+        nodes.put(origin, originNode);
     }
+    
+
+    public boolean isReached(Vertex vertex) {
+        PathNode node = nodes.get(vertex);
+        return node != null && node.getCost() != Double.POSITIVE_INFINITY;
+    }
+
+    public PathNode getOrCreateNode(Vertex vertex) {
+        return nodes.computeIfAbsent(vertex, v -> new PathNode(v));
+    }
+    
+    public Collection<Vertex> getReachedVertices() {
+        return nodes.keySet();
+    }
+    
 
 }

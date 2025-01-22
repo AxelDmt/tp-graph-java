@@ -44,11 +44,11 @@ public class DijkstraPathFinder {
 	 */
 	public List<Edge> findPath(Vertex origin, Vertex destination) {
 		log.info("findPath({},{})...", origin, destination);
-		pathTree = new PathTree(graph, origin);
+		pathTree = new PathTree(origin);
 		Vertex current;
 		while ((current = findNextVertex()) != null) {
 			visit(current);
-			if (pathTree.getNode(destination).getCost() != Double.POSITIVE_INFINITY ) {
+			if (pathTree.isReached(destination)) {
 				log.info("findPath({},{}) : path found", origin, destination);
 				return pathTree.getPath(destination);
 			}
@@ -75,7 +75,7 @@ public class DijkstraPathFinder {
 			 * Convervation de arc permettant d'atteindre le sommet avec un meilleur coût
 			 * sachant que les sommets non atteint ont pour coût "POSITIVE_INFINITY"
 			 */
-			PathNode reachedNode = pathTree.getNode(reachedVertex);
+			PathNode reachedNode = pathTree.getOrCreateNode(reachedVertex);
 			double newCost = pathTree.getNode(vertex).getCost() + outEdge.getCost();
 			if (newCost < reachedNode.getCost()) {
 				reachedNode.setCost(newCost);
@@ -98,16 +98,13 @@ public class DijkstraPathFinder {
 	private Vertex findNextVertex() {
 		double minCost = Double.POSITIVE_INFINITY;
 		Vertex result = null;
-		for (Vertex vertex : graph.getVertices()) {
+		for (Vertex vertex : pathTree.getReachedVertices()) {
 			PathNode node = pathTree.getNode(vertex);
 			// sommet déjà visité?
 			if (node.isVisited()) {
 				continue;
 			}
-			// sommet non atteint?
-			if (node.getCost() == Double.POSITIVE_INFINITY) {
-				continue;
-			}
+
 			// sommet le plus proche de la source?
 			if (node.getCost() < minCost) {
 				result = vertex;
