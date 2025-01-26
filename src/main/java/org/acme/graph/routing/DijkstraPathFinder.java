@@ -18,6 +18,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Node;
 
+import org.acme.graph.model.Isochrone;
+
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.algorithm.ConvexHull;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.locationtech.jts.geom.Geometry;
+
+
 /**
  * 
  * Utilitaire pour le calcul du plus court chemin dans un graphe
@@ -99,4 +112,47 @@ public class DijkstraPathFinder {
 		return pathTree.getNearestNonVisitedVertex();
 	}
 
+	public Isochrone findIsochrone(Vertex origin, double radius) {
+		log.info("findIsochrone({}, {})...", origin, radius);
+	
+		pathTree = new PathTree(origin);
+		Set<Coordinate> reachedCoordinates = new HashSet<>();
+	
+		// Visite des sommets dans le graphe
+		Vertex current;
+		while ((current = findNextVertex()) != null) {
+			visit(current);
+	
+			PathNode currentNode = pathTree.getNode(current);
+			if (currentNode.getCost() <= radius) {
+				// On ajoute les coordonnées atteintes si elles sont dans le rayon spécifié
+				reachedCoordinates.add(current.getCoordinate());
+			}
+	
+			// Si le coût dépasse le rayon, on arrête la recherche
+			if (currentNode.getCost() > radius) {
+				break;
+			}
+		}
+	
+		// Vérification si des points ont été atteints avant de procéder au ConvexHull
+		if (reachedCoordinates.isEmpty()) {
+			throw new IllegalStateException("Aucun point n'a été atteint dans le rayon spécifié.");
+		}
+	
+		// Calcul du polygone ConvexHull à partir des coordonnées
+		GeometryFactory geometryFactory = new GeometryFactory();
+		ConvexHull convexHull = new ConvexHull(reachedCoordinates.toArray(new Coordinate[0]), geometryFactory);
+	
+		// On s'assure que le ConvexHull retourne bien un Polygon
+		Geometry hullGeometry = convexHull.getConvexHull();
+		if (!(hullGeometry instanceof Polygon)) {
+			throw new IllegalStateException("Le ConvexHull ne retourne pas un Polygon valide.");
+		}
+	
+		Polygon isochronePolygon = (Polygon) hullGeometry;
+	
+		// Retourne l'isochrone avec le rayon et le polygone calculé
+		return new Isochrone(radius, isochronePolygon);
+	}
 }
