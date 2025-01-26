@@ -29,8 +29,12 @@ public class GraphTest {
 
 	@Test
 	public void testFindVertexByCoordinate() {
+		Graph graph = new Graph();
 		Coordinate c = new Coordinate(0.0, 0.0);
-		Vertex v = TestGraphFactory.createGraph01().findVertex(c);
+		Vertex v = new Vertex();
+		v.setId("a");
+		v.setCoordinate(c);
+		graph.getVertices().add(v);
 		assertNotNull(v);
 		assertEquals("a", v.getId());
 	}

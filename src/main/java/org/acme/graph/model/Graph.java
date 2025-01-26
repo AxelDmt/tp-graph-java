@@ -3,6 +3,9 @@ package org.acme.graph.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
 
 import org.acme.graph.errors.NotFoundException;
 import org.locationtech.jts.geom.Coordinate;
@@ -19,6 +22,8 @@ public class Graph {
 	 * Liste des sommets
 	 */
 	private List<Vertex> vertices = new ArrayList<>();
+
+	private Map<Coordinate, Vertex> vertexByCoordinate = new HashMap<>();
 
 	/**
 	 * Liste des arcs
@@ -56,14 +61,13 @@ public class Graph {
 	 * @return
 	 */
 	public Vertex findVertex(Coordinate coordinate) {
-		for (Vertex vertex : vertices) {
-			Coordinate candidate = vertex.getCoordinate();
-			if (candidate != null && candidate.equals(coordinate)) {
-				return vertex;
-			}
+		Vertex vertex = vertexByCoordinate.get(coordinate);
+		if (vertex == null) {
+			throw new NotFoundException(String.format("Vertex not found at [%s,%s]", coordinate.x, coordinate.y));
 		}
-		throw new NotFoundException(String.format("Vertex not found at [%s,%s]", coordinate.x, coordinate.y));
+		return vertex;
 	}
+
 
 	/**
 	 * Récupération ou création d'un sommet en assurant l'unicité
@@ -82,6 +86,7 @@ public class Graph {
 			vertex.setId(Integer.toString(getVertices().size()));
 			vertex.setCoordinate(coordinate);
 			vertices.add(vertex);
+			vertexByCoordinate.put(coordinate, vertex);
 		}
 		return vertex;
 	}
