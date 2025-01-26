@@ -5,9 +5,30 @@ import org.acme.graph.model.Vertex;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.googlecode.cqengine.attribute.SimpleAttribute;
+import com.googlecode.cqengine.query.option.QueryOptions;
+
 
 public class PathNode {
-    
+
+    public static final SimpleAttribute<PathNode, Vertex> VERTEX = new SimpleAttribute<PathNode, Vertex>("vertex") {
+        public Vertex getValue(PathNode node, QueryOptions queryOptions) {
+            return node.vertex;
+        }
+    };
+
+    public static final SimpleAttribute<PathNode, Double> COST = new SimpleAttribute<PathNode, Double>("cost") {
+        public Double getValue(PathNode node, QueryOptions queryOptions) {
+            return node.cost;
+        }
+    };
+
+    public static final SimpleAttribute<PathNode, Boolean> VISITED = new SimpleAttribute<PathNode, Boolean>("visited") {
+        public Boolean getValue(PathNode node, QueryOptions queryOptions) {
+            return node.visited;
+        }
+    };
+
 	private final Vertex vertex;
     /**
 	 * dijkstra - coût pour atteindre le sommet
@@ -21,6 +42,10 @@ public class PathNode {
 	 * dijkstra - indique si le sommet est visité
 	 */
 	private boolean visited;
+
+	public Vertex getVertex() {
+		return vertex;
+	}	
 
 	@JsonIgnore
 	public double getCost() {

@@ -15,15 +15,25 @@ import main.java.org.acme.graph.path.PathNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.googlecode.cqengine.IndexedCollection;
+import com.googlecode.cqengine.query.QueryFactory;
+import com.googlecode.cqengine.index.navigable.NavigableIndex;
+import com.googlecode.cqengine.index.hash.HashIndex;
+
+import java.util.stream.Collectors;
 
 public class PathTree {
 
     private static final Logger log = LogManager.getLogger(DijkstraPathFinder.class);
     private Graph graph;
-	private Map<Vertex, PathNode> nodes;
+	private IndexedCollection<PathNode> nodes;
+
 
     public PathNode getNode(Vertex vertex) {
-        return nodes.get(vertex);
+        return nodes.retrieve(QueryFactory.equal(PathNode.VERTEX, vertex))
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
     }
 
     /**
@@ -57,25 +67,67 @@ public class PathTree {
 	 */
     public PathTree(Vertex origin) {
         log.trace("initGraph({})", origin);
-        this.nodes = new HashMap<>();
+    
+        this.nodes = new com.googlecode.cqengine.ConcurrentIndexedCollection<>();
+        this.nodes.addIndex(HashIndex.onAttribute(PathNode.VERTEX));
+        this.nodes.addIndex(NavigableIndex.onAttribute(PathNode.COST));
+        this.nodes.addIndex(HashIndex.onAttribute(PathNode.VISITED));
+    
+        // Ajouter le nœud d'origine
         PathNode originNode = new PathNode(origin);
         originNode.setCost(0.0);
-        nodes.put(origin, originNode);
-    }
+        nodes.add(originNode);
+    }   
     
-
     public boolean isReached(Vertex vertex) {
-        PathNode node = nodes.get(vertex);
+        PathNode node = nodes.retrieve(QueryFactory.equal(PathNode.VERTEX, vertex))
+                     .stream()
+                     .findFirst()
+                     .orElse(null);
         return node != null && node.getCost() != Double.POSITIVE_INFINITY;
     }
 
     public PathNode getOrCreateNode(Vertex vertex) {
-        return nodes.computeIfAbsent(vertex, v -> new PathNode(v));
+        PathNode node = nodes.stream()
+                             .filter(n -> n.getVertex().equals(vertex))
+                             .findFirst()
+                             .orElse(null);
+        if (node == null) {
+            node = new PathNode(vertex);
+            nodes.add(node);
+        }
+        return node;
     }
+    
     
     public Collection<Vertex> getReachedVertices() {
-        return nodes.keySet();
+        return nodes.stream()
+                    .filter(node -> node.getCost() != Double.POSITIVE_INFINITY)
+                    .map(PathNode::getVertex)
+                    .collect(Collectors.toList());
+    }
+
+    public void markVisited(Vertex vertex) {
+        PathNode node = getNode(vertex);
+        nodes.remove(node); 
+        node.setVisited(true);
+        nodes.add(node); 
     }
     
+    public void setReached(Vertex vertex, double reachingCost, Edge reachingEdge) {
+        PathNode node = getOrCreateNode(vertex);
+        nodes.remove(node); 
+        node.setCost(reachingCost);
+        node.setReachingEdge(reachingEdge);
+        nodes.add(node); 
+    }
 
+    public Vertex getNearestNonVisitedVertex() {
+        return nodes.stream()
+                    .filter(node -> !node.isVisited())
+                    .min((n1, n2) -> Double.compare(n1.getCost(), n2.getCost())) 
+                    .map(PathNode::getVertex) 
+                    .orElse(null); 
+    }
+    
 }

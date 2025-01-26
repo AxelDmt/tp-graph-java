@@ -96,22 +96,7 @@ public class DijkstraPathFinder {
 	 * @return
 	 */
 	private Vertex findNextVertex() {
-		double minCost = Double.POSITIVE_INFINITY;
-		Vertex result = null;
-		for (Vertex vertex : pathTree.getReachedVertices()) {
-			PathNode node = pathTree.getNode(vertex);
-			// sommet déjà visité?
-			if (node.isVisited()) {
-				continue;
-			}
-
-			// sommet le plus proche de la source?
-			if (node.getCost() < minCost) {
-				result = vertex;
-				minCost = node.getCost();
-			}
-		}
-		return result;
+		return pathTree.getNearestNonVisitedVertex();
 	}
 
 }
